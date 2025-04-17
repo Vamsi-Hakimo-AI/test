@@ -1,0 +1,38 @@
+name: Trigger Jenkins Appliance Phase 2 job
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  trigger-phase2:
+    if: >
+      contains(github.event.head_commit.message, 'automated-pr') &&
+      startsWith(github.ref, 'refs/heads/deployment/appliance/')
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          separator: "\n"
+
+      - name: Check for hip-motion file changes
+        id: check-hip-files
+        run: |
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [[ "$file" == tenants/*/hip-motion/kustomization.yaml || "$file" == tenants/*/hip-motion/hip-values.yaml ]]; then
+              echo "MATCH_FOUND=true" >> $GITHUB_ENV
+              exit 0
+            fi
+          done
+          echo "MATCH_FOUND=false" >> $GITHUB_ENV
+
+      - name: Print Hello World
+        if: env.MATCH_FOUND == 'true'
+        run: echo "Hello World"
