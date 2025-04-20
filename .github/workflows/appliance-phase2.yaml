@@ -3,7 +3,7 @@ name: Trigger Jenkins Appliance Phase 2 job
 on:
   push:
     branches:
-      - 'deployment/appliance/**'
+      - main
 
 jobs:
   trigger-phase2:
