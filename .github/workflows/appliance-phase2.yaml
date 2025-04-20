@@ -1,15 +1,16 @@
 name: Trigger Jenkins Appliance Phase 2 job
 
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches:
       - main
 
 jobs:
   trigger-phase2:
     if: >
-      contains(github.event.head_commit.message, 'automated-pr') &&
-      startsWith(github.ref, 'refs/heads/deployment/appliance/')
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'deployment/appliance/')
     runs-on: ubuntu-22.04
 
     steps:
@@ -36,4 +37,5 @@ jobs:
       - name: Print Hello World
         if: env.MATCH_FOUND == 'true'
         run: echo "Hello World"
+
         
