@@ -39,7 +39,7 @@ jobs:
       - name: Trigger Jenkins job
         if: env.MATCH_FOUND == 'true'
         run: |
-          curl -X POST "$JENKINS_URL/view/alljob/trigger-phase2-test/build" \
+          curl -X POST "$JENKINS_URL/view/all/job/trigger-phase2-test/build" \
             --user "$JENKINS_USER:$JENKINS_API_TOKEN"
 
         
