@@ -45,7 +45,10 @@ jobs:
         run: |
           echo "curl -X POST $JENKINS_URL/view/all/job/trigger-phase2-test/build --user $JENKINS_USER:***"
           curl -X POST "$JENKINS_URL/view/all/job/trigger-phase2-test/build" \
-            --user "$JENKINS_USER:$JENKINS_API_TOKEN"
+            --user "$JENKINS_USER:$JENKINS_API_TOKEN" \
+            --data "Tenant_ID=tenant-test1" \
+            --data "Tenant_Name=TenantTest1" \
+            --data "Hostname_Prefix=tenanttest1"
 
 
         
