@@ -36,8 +36,10 @@ jobs:
           done
           echo "MATCH_FOUND=false" >> $GITHUB_ENV
 
-      - name: Print Hello World
+      - name: Trigger Jenkins job
         if: env.MATCH_FOUND == 'true'
-        run: echo "Hello World"
+        run: |
+          curl -X POST "$JENKINS_URL/view/alljob/trigger-phase2-test/build" \
+            --user "$JENKINS_USER:$JENKINS_API_TOKEN"
 
         
