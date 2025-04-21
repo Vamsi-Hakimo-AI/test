@@ -36,6 +36,24 @@ jobs:
           done
           echo "MATCH_FOUND=false" >> $GITHUB_ENV
 
+      - name: Extract tenant info from JSON in PR body
+        if: env.MATCH_FOUND == 'true'
+        id: extract-tenant-json
+        run: |
+          echo '${{ github.event.pull_request.body }}' > pr_body.json
+
+          TENANT_ID=$(jq '.Tenant_ID' pr_body.json)
+          TENANT_NAME=$(jq '.Tenant_Name' pr_body.json)
+          HOSTNAME_PREFIX=$(jq '.Hostname_Prefix' pr_body.json)
+
+          echo "Tenant_ID: $TENANT_ID"
+          echo "Tenant_Name: $TENANT_NAME"
+          echo "Hostname_Prefix: $HOSTNAME_PREFIX"
+
+          echo "TENANT_ID=$TENANT_ID" >> $GITHUB_ENV
+          echo "TENANT_NAME=$TENANT_NAME" >> $GITHUB_ENV
+          echo "HOSTNAME_PREFIX=$HOSTNAME_PREFIX" >> $GITHUB_ENV
+
       - name: Trigger Jenkins job
         if: env.MATCH_FOUND == 'true'
         env:
@@ -43,12 +61,13 @@ jobs:
           JENKINS_USER: ${{ secrets.JENKINS_USER }}
           JENKINS_API_TOKEN: ${{ secrets.JENKINS_API_TOKEN }}
         run: |
-          echo "curl -X POST $JENKINS_URL/view/all/job/trigger-phase2-test/build --user $JENKINS_USER:***"
+          echo "Triggering Jenkins job with parameters from PR body..."
           curl -X POST "$JENKINS_URL/view/all/job/trigger-phase2-test/buildWithParameters" \
             --user "$JENKINS_USER:$JENKINS_API_TOKEN" \
-            --data "Tenant_ID=tenant-test1" \
-            --data "Tenant_Name=TenantTest1" \
-            --data "Hostname_Prefix=tenanttest1"
+            --data "Tenant_ID=$TENANT_ID" \
+            --data "Tenant_Name=$TENANT_NAME" \
+            --data "Hostname_Prefix=$HOSTNAME_PREFIX"
+
 
 
         
