@@ -36,19 +36,15 @@ jobs:
           done
           echo "MATCH_FOUND=false" >> $GITHUB_ENV
 
-      - name: Extract tenant info from JSON in PR body
+
+      - name: Extract tenant info from YAML in PR body
         if: env.MATCH_FOUND == 'true'
-        id: extract-tenant-json
         run: |
-          echo '${{ github.event.pull_request.body }}' > pr_body.json
+          echo "${{ github.event.pull_request.body }}" > pr_body.yaml
 
-          TENANT_ID=$(jq '.Tenant_ID' pr_body.json)
-          TENANT_NAME=$(jq '.Tenant_Name' pr_body.json)
-          HOSTNAME_PREFIX=$(jq '.Hostname_Prefix' pr_body.json)
-
-          echo "Tenant_ID: $TENANT_ID"
-          echo "Tenant_Name: $TENANT_NAME"
-          echo "Hostname_Prefix: $HOSTNAME_PREFIX"
+          export TENANT_ID=$(yq '.Tenant_ID' pr_body.yaml)
+          export TENANT_NAME=$(yq '.Tenant_Name' pr_body.yaml)
+          export HOSTNAME_PREFIX=$(yq '.Hostname_Prefix' pr_body.yaml)
 
           echo "TENANT_ID=$TENANT_ID" >> $GITHUB_ENV
           echo "TENANT_NAME=$TENANT_NAME" >> $GITHUB_ENV
@@ -57,8 +53,8 @@ jobs:
       - name: Trigger Jenkins job
         if: env.MATCH_FOUND == 'true'
         env:
-          JENKINS_URL: ${{ secrets.JENKINS_URL }}
-          JENKINS_USER: ${{ secrets.JENKINS_USER }}
+          JENKINS_URL: ${{ vars.JENKINS_URL }}
+          JENKINS_USER: ${{ vars.JENKINS_USER }}
           JENKINS_API_TOKEN: ${{ secrets.JENKINS_API_TOKEN }}
         run: |
           echo "Triggering Jenkins job with parameters from PR body..."
