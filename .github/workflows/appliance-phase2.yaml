@@ -10,7 +10,7 @@ jobs:
   trigger-phase2:
     if: >
       github.event.pull_request.merged == true &&
-      contains(github.event.pull_request.title, 'automated-pr') &&
+      contains(github.event.pull_request.title, 'Automated PR') &&
       contains(github.event.pull_request.labels.*.name, 'chore') &&
       startsWith(github.event.pull_request.head.ref, 'deployment/appliance/')
     runs-on: ubuntu-22.04
