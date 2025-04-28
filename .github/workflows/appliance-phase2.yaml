@@ -65,16 +65,16 @@ jobs:
             --data "Hostname_Prefix=$HOSTNAME_PREFIX"
         
       - name: Post text to a Slack channel
+        if: env.MATCH_FOUND == 'true'
         uses: slackapi/slack-github-action@v2.0.0
-        env:
-          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             {
-              "channel": "${{ env.SLACK_CHANNEL_ID }}",
-              "text": "Deployment done"
+              "channel": "D088M8J0Y1K",
+              "text": "✅ Deployment completed successfully!"
             }
+
 
       
