@@ -67,13 +67,9 @@ jobs:
       - name: Send Slack Message
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          slack_token: ${{ secrets.SLACK_TOKEN }}
-          channel: 'D088M8J0Y1K'  
-          result: ${{ steps.trigger-phase2.outcome }}  
-          message: "Deployment for Tenant *${{ env.TENANT_NAME }}* (ID: ${{ env.TENANT_ID }}) is complete! :rocket:"
-          fields: |
-            Job URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            Build Result: ${{ steps.trigger-phase2.outcome }}
-            Head (Source) Branch: ${{ github.head_ref }}
-            Base (Target) Branch: ${{ github.base_ref }}
+          bot-token: ${{ secrets.SLACK_BOT_TOKEN }}  
+          channel-id: 'D088M8J0Y1K' 
+          slack-message: "Deployment is complete! :rocket:"
+
+
   
