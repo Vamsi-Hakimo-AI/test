@@ -75,9 +75,10 @@ jobs:
         uses: act10ns/slack@v2
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack-message: "✅ Deployment done for tenant ${{ env.TENANT_NAME }}"
           status: success
-          message: "✅ Deployment done for tenant."
         if: always()
+
 
 
 
