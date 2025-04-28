@@ -63,6 +63,15 @@ jobs:
             --data "Tenant_ID=$TENANT_ID" \
             --data "Tenant_Name=$TENANT_NAME" \
             --data "Hostname_Prefix=$HOSTNAME_PREFIX"
+        
+      - name: Post text to a Slack channel
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "Deployment done"
 
 
 
