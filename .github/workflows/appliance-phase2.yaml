@@ -69,8 +69,13 @@ jobs:
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
-          channel: ${{ secrets.SLACK_CHANNEL_ID }}
-          text: "Deployment done"
+          payload: |
+            {
+              "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
+              "text": "Deployment done"
+            }
+
+
 
 
 
