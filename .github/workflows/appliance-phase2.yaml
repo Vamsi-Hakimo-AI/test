@@ -63,18 +63,20 @@ jobs:
             --data "Tenant_ID=$TENANT_ID" \
             --data "Tenant_Name=$TENANT_NAME" \
             --data "Hostname_Prefix=$HOSTNAME_PREFIX"
-        
-      - name: Post text to a Slack channel
-        if: env.MATCH_FOUND == 'true'
+            
+      - name: Send Slack Message
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          method: chat.postMessage
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-          payload: |
-            {
-              "channel": "D088M8J0Y1K",
-              "text": "✅ Deployment completed successfully!"
-            }
+          slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
+          channel: 'D088M8J0Y1K'
+          result: 'success'
+          message: "Deployment completed successfully!"
+          fields: |
+            Job URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Pull Request URL: ${{ github.event.pull_request.html_url }}
+            Head Branch: ${{ github.head_ref }}
+            Base Branch: ${{ github.base_ref }}
+
 
 
       
