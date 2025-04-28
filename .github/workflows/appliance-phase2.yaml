@@ -64,13 +64,6 @@ jobs:
             --data "Tenant_Name=$TENANT_NAME" \
             --data "Hostname_Prefix=$HOSTNAME_PREFIX"
 
-      - name: Send Slack Message
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          bot-token: ${{ secrets.SLACK_BOT_TOKEN }}  
-          channel-id: 'D088M8J0Y1K' 
-          slack-message: "Deployment is complete! :rocket:"
-
       - name: Send Slack Notification
         uses: act10ns/slack@v2
         with:
