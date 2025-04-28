@@ -65,22 +65,15 @@ jobs:
             --data "Hostname_Prefix=$HOSTNAME_PREFIX"
 
       - name: Send Slack Message
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@v1.24.0
         with:
-          method: chat.postMessage
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-          payload: |
-            {
-              "channel": "D088M8J0Y1K",
-              "text": "✅ Deployment completed successfully!",
-              "attachments": [
-                {
-                  "text": "Job URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\nPull Request URL: ${{ github.event.pull_request.html_url }}\nHead Branch: ${{ github.head_ref }}\nBase Branch: ${{ github.base_ref }}"
-                }
-              ]
-            }
-
-
-
-
-      
+          slack_token: ${{ secrets.SLACK_TOKEN }}
+          channel: 'D088M8J0Y1K'  
+          result: ${{ steps.trigger-phase2.outcome }}  
+          message: "Deployment for Tenant *${{ env.TENANT_NAME }}* (ID: ${{ env.TENANT_ID }}) is complete! :rocket:"
+          fields: |
+            Job URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Build Result: ${{ steps.trigger-phase2.outcome }}
+            Head (Source) Branch: ${{ github.head_ref }}
+            Base (Target) Branch: ${{ github.base_ref }}
+  
