@@ -71,5 +71,15 @@ jobs:
           channel-id: 'D088M8J0Y1K' 
           slack-message: "Deployment is complete! :rocket:"
 
+      - name: Send Slack Notification
+        uses: act10ns/slack@v2
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          status: success
+          message: "✅ Deployment done for tenant."
+        if: always()
+
+
+
 
   
