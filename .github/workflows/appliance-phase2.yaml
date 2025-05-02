@@ -58,12 +58,20 @@ jobs:
           JENKINS_USER: ${{ vars.JENKINS_USER }}
           JENKINS_API_TOKEN: ${{ secrets.JENKINS_API_TOKEN }}
         run: |
-          echo "Triggering Jenkins job with parameters from PR body..."
-          curl -X POST "$JENKINS_URL/view/all/job/trigger-phase2-test/buildWithParameters" \
+          echo "Triggering Jenkins job"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$JENKINS_URL/view/all/job/trigger-phase2-test/buildWithParameters" \
             --user "$JENKINS_USER:$JENKINS_API_TOKEN" \
             --data "Tenant_ID=$TENANT_ID" \
             --data "Tenant_Name=$TENANT_NAME" \
-            --data "Hostname_Prefix=$HOSTNAME_PREFIX"
+            --data "Hostname_Prefix=$HOSTNAME_PREFIX")
+
+          echo "Jenkins returned HTTP $HTTP_CODE"
+
+          if [[ "$HTTP_CODE" -ne 201 ]]; then
+            echo "Jenkins job trigger failed"
+            exit 1
+          fi
+
 
       - name: Send Slack Notification
         if: steps.trigger_jenkins.outcome == 'success'
