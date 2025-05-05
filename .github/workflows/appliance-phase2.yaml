@@ -75,6 +75,8 @@ jobs:
       - name: Send Slack Message on Jenkins Phase 2 Trigger Failure
         if: failure() && steps.trigger_jenkins.outcome == 'failure'
         uses: prakritish/slack-notification@v2
+        env:
+          SLACK_CHANNEL: ${{ vars.SLACK_CHANNEL }}
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ env.SLACK_CHANNEL }}
