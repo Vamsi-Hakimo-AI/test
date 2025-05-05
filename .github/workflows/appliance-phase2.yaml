@@ -53,6 +53,7 @@ jobs:
       - name: Trigger Jenkins job
         id: trigger_jenkins
         if: env.MATCH_FOUND == 'true'
+        continue-on-error: true 
         env:
           JENKINS_URL: ${{ vars.JENKINS_URL }}
           JENKINS_USER: ${{ vars.JENKINS_USER }}
@@ -73,7 +74,7 @@ jobs:
           fi
 
       - name: Send Slack Message on Jenkins Phase 2 Trigger Failure
-        if: failure() && steps.trigger_jenkins.outcome == 'failure'
+        if: steps.trigger_jenkins.outcome == 'failure'
         uses: prakritish/slack-notification@v2
         env:
           SLACK_CHANNEL: ${{ vars.SLACK_CHANNEL }}
