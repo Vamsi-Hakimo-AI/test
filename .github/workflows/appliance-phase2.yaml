@@ -72,22 +72,20 @@ jobs:
             exit 1
           fi
 
-
-      - name: Send Slack Notification
-        if: steps.trigger_jenkins.outcome == 'success'
-        uses: act10ns/slack@v2
-        with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          message: "✅ Deployment done for tenant ${{ env.TENANT_NAME }}"
-          status: success
-
-      - name: Send Slack Failure Notification
+      - name: Send Slack Message on Jenkins Phase 2 Trigger Failure
         if: failure() && steps.trigger_jenkins.outcome == 'failure'
-        uses: act10ns/slack@v2
+        uses: prakritish/slack-notification@v2
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          message: "❌ Failed to trigger Jenkins job for tenant ${{ env.TENANT_NAME }}"
-          status: failure
+          slack_token: ${{ secrets.SLACK_TOKEN }}
+          channel: ${{ env.SLACK_CHANNEL }}
+          result: "FAIL"
+          username: "GithubAction"
+          message: "Failed to trigger Appliance Phase 2 Jenkins job for Tenant ID - ${{ env.TENANT_ID }} ."
+          fields: |
+            Job URL:${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Result: Failure
+            Triggered By: ${{ github.actor }}
+
 
 
 
