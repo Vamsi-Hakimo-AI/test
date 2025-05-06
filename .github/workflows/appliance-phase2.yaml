@@ -41,11 +41,12 @@ jobs:
         if: env.MATCH_FOUND == 'true'
         run: |
           echo "${{ github.event.pull_request.body }}" > pr_body.yaml
-
+          export TRIGGERED_BY=$(yq '.Triggered_by' pr_body.yaml)
           export TENANT_ID=$(yq '.Tenant_ID' pr_body.yaml)
           export TENANT_NAME=$(yq '.Tenant_Name' pr_body.yaml)
           export HOSTNAME_PREFIX=$(yq '.Hostname_Prefix' pr_body.yaml)
 
+          echo "TRIGGERED_BY=$TRIGGERED_BY" >> $GITHUB_ENV
           echo "TENANT_ID=$TENANT_ID" >> $GITHUB_ENV
           echo "TENANT_NAME=$TENANT_NAME" >> $GITHUB_ENV
           echo "HOSTNAME_PREFIX=$HOSTNAME_PREFIX" >> $GITHUB_ENV
@@ -83,11 +84,12 @@ jobs:
           channel: ${{ env.SLACK_CHANNEL }}
           result: "FAIL"
           username: "GithubAction"
-          message: "Failed to trigger Appliance Phase 2 Jenkins job for Tenant ID - ${{ env.TENANT_ID }} ."
+          message: "Failed to trigger Appliance Phase 2 Jenkins job for Tenant ID - ${{ env.TENANT_ID }}."
           fields: |
-            Job URL:${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Job URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
             Result: Failure
-            Triggered By: ${{ github.actor }}
+            Triggered By: ${{ env.TRIGGERED_BY }}
+            Deployment Type: Ubuntu phase 2
 
 
 
