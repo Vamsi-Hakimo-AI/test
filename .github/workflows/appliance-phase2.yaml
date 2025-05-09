@@ -29,17 +29,13 @@ jobs:
         id: check-hip-files
         run: |
           MATCH_FOUND=false
-          readarray -t files <<< "${{ steps.changed-files.outputs.all_changed_files }}"
-          for file in "${files[@]}"; do
+          echo "${{ steps.changed-files.outputs.all_changed_files }}" | while IFS= read -r file; do
             if [[ "$file" == tenants/*/hip-motion/kustomization.yaml || "$file" == tenants/*/hip-motion/hip-values.yaml ]]; then
               MATCH_FOUND=true
               break
             fi
           done
           echo "MATCH_FOUND=$MATCH_FOUND" >> $GITHUB_ENV
-
-
-
 
       - name: Extract tenant info from YAML in PR body
         if: env.MATCH_FOUND == 'true'
