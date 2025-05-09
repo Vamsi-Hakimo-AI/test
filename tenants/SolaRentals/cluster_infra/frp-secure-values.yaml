@@ -1,0 +1,10 @@
+# Default values for frp-appliance.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: frp-support-secure
+spec:
+  values:
+    enabled: false
