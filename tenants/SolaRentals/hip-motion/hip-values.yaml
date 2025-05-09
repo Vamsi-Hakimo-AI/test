@@ -1,0 +1,257 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: hip
+spec:
+  timeout: "120m0s"
+  install:
+    timeout: "120m0s"
+  values:
+    bindPV: true
+    components:
+      dataSync: false
+      acsRunner: false
+      cameraSync: true
+      serverSync: true
+      backfiller: false
+      livestreamCheck: false
+      acsListenerService:
+        enabled: false
+        nodePort: 31001
+    flower:
+      enabled: false
+    rtsp:
+      enabled: false
+    playback:
+      enabled: false
+    motion:
+      enabled: false
+      url: http://hip-acs-listener.motion.svc.cluster.local/motion/v1/motion_detection
+      retry_duration_seconds: 180
+      resources:
+        limits:
+          cpu: 18000m
+          memory: 4Gi
+        requests:
+          cpu: 10000m
+          memory: 500Mi
+      cameras: []
+    motionDetectionV2:
+      enabled: true
+      cameras:
+        - id: "1"
+          enableSmartMask: True
+        - id: "2"
+          enableSmartMask: True
+        - id: "3"
+          enableSmartMask: True
+        - id: "4"
+          enableSmartMask: True
+        - id: "5"
+          enableSmartMask: True
+        - id: "6"
+          enableSmartMask: True
+        - id: "7"
+          enableSmartMask: True
+        - id: "8"
+          enableSmartMask: True
+        - id: "9"
+          enableSmartMask: True
+        - id: "10"
+          enableSmartMask: True
+        - id: "11"
+          enableSmartMask: True
+        - id: "12"
+          enableSmartMask: True
+        - id: "13"
+          enableSmartMask: True
+        - id: "14"
+          enableSmartMask: True
+        - id: "15"
+          enableSmartMask: True
+        - id: "16"
+          enableSmartMask: True
+        - id: "17"
+          enableSmartMask: True
+        - id: "18"
+          enableSmartMask: True
+        - id: "19"
+          enableSmartMask: True
+        - id: "20"
+          enableSmartMask: True
+    hip:
+      VMS:
+        integration_type:
+          - RTSP
+        MOTION_CONFIG:
+          motion_media_root_folder: "/data/motion"
+        MOTION_DETECTION_WINDOW:
+          # 8pm - 5am
+          start_at_utc: "03:00:00"
+          end_at_utc: "13:00:00"
+        LIVESTREAM_ROOT: /data/motion/livestream
+        RTSP_CONFIG:
+          rtsp_videos_root_folder: "/data/motion"
+          video_filename_format: "%Y-%m-%d-%H-%M-%S"
+          video_encoding_format: "mp4"
+          playback_segments_root_folder: "/data/video_playback"
+          "1":
+            name: "POE 1"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/1"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/1
+            segment_duration: 2
+          "2":
+            name: "POE 2"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/2"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/2
+            segment_duration: 2
+          "3":
+            name: "POE 3"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/3"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/3
+            segment_duration: 2
+          "4":
+            name: "POE 4"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/4"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/4
+            segment_duration: 2
+          "5":
+            name: "POE 5"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/5"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/5
+            segment_duration: 2
+          "6":
+            name: "POE 6"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/6"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/6
+            segment_duration: 2
+          "7":
+            name: "POE 7"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/7"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/7
+            segment_duration: 2
+          "8":
+            name: "POE 8"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/8"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/8
+            segment_duration: 2
+          "9":
+            name: "POE 9"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/9"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/9
+            segment_duration: 2
+          "10":
+            name: "POE 10"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/10"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/10
+            segment_duration: 2
+          "11":
+            name: "POE 11"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/11"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/11
+            segment_duration: 2
+          "12":
+            name: "POE 12"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/12"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/12
+            segment_duration: 2
+          "13":
+            name: "POE 13"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/13"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/13
+            segment_duration: 2
+          "14":
+            name: "POE 14"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/14"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/14
+            segment_duration: 2
+          "15":
+            name: "POE 15"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/15"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/15
+            segment_duration: 2
+          "16":
+            name: "POE 16"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/16"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/16
+            segment_duration: 2
+          "17":
+            name: "POE 17"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/17"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/17
+            segment_duration: 2
+          "18":
+            name: "POE 18"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/18"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/18
+            segment_duration: 2
+          "19":
+            name: "Camera 28"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/19"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/19
+            segment_duration: 2
+          "20":
+            name: "Camera 29"
+            rtsp_url: "rtsp://192.168.1.109:8554/camera/20"
+            livestream_url: https://live.hakimo.ai:8889/solarentals/20
+            segment_duration: 2
+      conf:
+        VMS_ONLY_MODE: true
+        SOURCE_SYSTEM: Motion
+        MOTION_CONSUMER_CELERY_V2: True
+        MOTION_SEGMENT_LENGTH: 5
+        MOTION_SEGMENT_TARGET_FPS: 5
+        HTTP_API_HOST: https://prod.i.hakimo.ai
+        HTTP_API_PORT: 443
+        HAKIMO_TENANT_ID: sola-rentals
+        S3_BUCKET: hakimo-livestream-prod
+        CLEANUP_FOLDER: /data/cleanup/motion
+        APP_FOLDERS_FOR_CLEANUP:
+          - path: /data/motion
+            use_stat: False
+            older_than: 8
+            file_datetime_format: "%Y-%m-%d-%H-%M-%S"
+            skip_folders_basename:
+              - livestream
+          - path: /data/camera_images
+            use_stat: True
+            older_than: 24
+          - path: /data/video_playback
+            use_stat: True
+            older_than: 240
+        MOTION:
+          apiEndpoint: "/api/v2/motion/event"
+        PUSHGATEWAY:
+          enabled: true
+          service_name: "pushgateway-prometheus-pushgateway.monitoring.svc.cluster.local:9091"
+    celery:
+      default:
+        replicas: 1
+        workerPerReplica: 20
+        resources:
+          limits:
+            cpu: 500m
+            memory: 3000Mi
+          requests:
+            cpu: 200m
+            memory: 1000Mi
+      videos:
+        replicas: 1
+        workerPerReplica: 20
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 5000Mi
+          requests:
+            cpu: 300m
+            memory: 1000Mi
+      alarms:
+        replicas: 1
+        workerPerReplica: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 2000Mi
+          requests:
+            cpu: 200m
+            memory: 1000Mi
