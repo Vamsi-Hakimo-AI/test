@@ -28,13 +28,15 @@ jobs:
       - name: Check for hip-motion file changes
         id: check-hip-files
         run: |
+          MATCH_FOUND=false
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             if [[ "$file" == tenants/*/hip-motion/kustomization.yaml || "$file" == tenants/*/hip-motion/hip-values.yaml ]]; then
-              echo "MATCH_FOUND=true" >> $GITHUB_ENV
-              exit 0
+              MATCH_FOUND=true
+              break
             fi
           done
-          echo "MATCH_FOUND=false" >> $GITHUB_ENV
+          echo "MATCH_FOUND=$MATCH_FOUND" >> $GITHUB_ENV
+
 
 
       - name: Extract tenant info from YAML in PR body
