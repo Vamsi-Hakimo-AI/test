@@ -4,28 +4,64 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - main
+      - master
+  push:
+    branches:
+      - master
 
 jobs:
   trigger-phase2:
-    if: >
-      github.event.pull_request.merged == true &&
-      contains(github.event.pull_request.title, 'Automated PR') &&
-      contains(github.event.pull_request.labels.*.name, 'chore') &&
-      startsWith(github.event.pull_request.head.ref, 'deployment/appliance/')
     runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Validate the pull request
+        id: context
+        run: |
+          echo "MATCH_FOUND=false" >> $GITHUB_ENV
+          echo "PR_TRIGGER_ELIGIBLE=false" >> $GITHUB_ENV
+
+          echo "EVENT_NAME=${{ github.event_name }}" >> $GITHUB_ENV
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "Evaluating pull_request context..."
+
+            if [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
+              TITLE="${{ github.event.pull_request.title }}"
+              if [[ "$TITLE" == *"Automated PR for Appliance Tenant"* ]]; then
+                BRANCH="${{ github.event.pull_request.head.ref }}"
+                if [[ "$BRANCH" == deployment/appliance/* ]]; then
+                  LABELS=$(jq -r '.pull_request.labels[].name' <<< '${{ toJson(github.event) }}')
+                  if echo "$LABELS" | grep -q "new_deployment"; then
+                    echo "PR_TRIGGER_ELIGIBLE=true" >> $GITHUB_ENV
+                  fi
+                fi
+              fi
+            fi
+
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "Evaluating push context..."
+
+            # Fetch the last commit message
+            COMMIT_MSG=$(git log -1 --pretty=%B)
+            echo "Last commit message: $COMMIT_MSG"
+
+            if [[ "$COMMIT_MSG" == *"Adding Motion template"* ]]; then
+              echo "PR_TRIGGER_ELIGIBLE=true" >> $GITHUB_ENV
+            fi
+          fi
+
       - name: Get changed files
+        if: env.PR_TRIGGER_ELIGIBLE == 'true'
         id: changed-files
         uses: tj-actions/changed-files@v44
         with:
           separator: "\n"
 
       - name: Check for hip-motion file changes
+        if: env.PR_TRIGGER_ELIGIBLE == 'true'
         id: check-hip-files
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
@@ -38,7 +74,7 @@ jobs:
 
 
       - name: Extract tenant info from YAML in PR body
-        if: env.MATCH_FOUND == 'true'
+        if: env.MATCH_FOUND == 'true' && github.event_name == 'pull_request'
         run: |
           echo "${{ github.event.pull_request.body }}" > pr_body.yaml
           export TRIGGERED_BY=$(yq '.Triggered_by' pr_body.yaml)
@@ -61,7 +97,7 @@ jobs:
           JENKINS_API_TOKEN: ${{ secrets.JENKINS_API_TOKEN }}
         run: |
           echo "Triggering Jenkins job"
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$JENKINS_URL/view/all/job/trigger-phase3-test/buildWithParameters" \
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$JENKINS_URL/view/all/job/trigger-phase2-test/buildWithParameters" \
             --user "$JENKINS_USER:$JENKINS_API_TOKEN" \
             --data "Tenant_ID=$TENANT_ID" \
             --data "Tenant_Name=$TENANT_NAME" \
