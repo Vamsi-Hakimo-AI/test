@@ -5,63 +5,27 @@ on:
     types: [closed]
     branches:
       - main
-  push:
-    branches:
-      - main
 
 jobs:
   trigger-phase2:
+    if: >
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.title, 'Automated PR for Appliance Tenant') &&
+      contains(github.event.pull_request.labels.*.name, 'new_deployment') &&
+      startsWith(github.event.pull_request.head.ref, 'deployment/appliance/')
     runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Validate the pull request
-        id: context
-        run: |
-          echo "MATCH_FOUND=false" >> $GITHUB_ENV
-          echo "PR_TRIGGER_ELIGIBLE=false" >> $GITHUB_ENV
-
-          echo "EVENT_NAME=${{ github.event_name }}" >> $GITHUB_ENV
-
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "Evaluating pull_request context..."
-
-            if [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
-              TITLE="${{ github.event.pull_request.title }}"
-              if [[ "$TITLE" == *"Automated PR for Appliance Tenant"* ]]; then
-                BRANCH="${{ github.event.pull_request.head.ref }}"
-                if [[ "$BRANCH" == deployment/appliance/* ]]; then
-                  LABELS=$(jq -r '.pull_request.labels[].name' <<< '${{ toJson(github.event) }}')
-                  if echo "$LABELS" | grep -q "new_deployment"; then
-                    echo "PR_TRIGGER_ELIGIBLE=true" >> $GITHUB_ENV
-                  fi
-                fi
-              fi
-            fi
-
-          elif [[ "${{ github.event_name }}" == "push" ]]; then
-            echo "Evaluating push context..."
-
-            # Fetch the last commit message
-            COMMIT_MSG=$(git log -1 --pretty=%B)
-            echo "Last commit message: $COMMIT_MSG"
-
-            if [[ "$COMMIT_MSG" == *"Adding Motion template"* ]]; then
-              echo "PR_TRIGGER_ELIGIBLE=true" >> $GITHUB_ENV
-            fi
-          fi
-
       - name: Get changed files
-        if: env.PR_TRIGGER_ELIGIBLE == 'true'
         id: changed-files
         uses: tj-actions/changed-files@v44
         with:
           separator: "\n"
 
       - name: Check for hip-motion file changes
-        if: env.PR_TRIGGER_ELIGIBLE == 'true'
         id: check-hip-files
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
@@ -74,15 +38,14 @@ jobs:
 
 
       - name: Extract tenant info from YAML in PR body
-        if: env.MATCH_FOUND == 'true' && github.event_name == 'pull_request'
+        if: env.MATCH_FOUND == 'true'
         run: |
           echo "${{ github.event.pull_request.body }}" > pr_body.yaml
-          export TRIGGERED_BY=$(yq '.Triggered_by' pr_body.yaml)
+
           export TENANT_ID=$(yq '.Tenant_ID' pr_body.yaml)
           export TENANT_NAME=$(yq '.Tenant_Name' pr_body.yaml)
           export HOSTNAME_PREFIX=$(yq '.Hostname_Prefix' pr_body.yaml)
 
-          echo "TRIGGERED_BY=$TRIGGERED_BY" >> $GITHUB_ENV
           echo "TENANT_ID=$TENANT_ID" >> $GITHUB_ENV
           echo "TENANT_NAME=$TENANT_NAME" >> $GITHUB_ENV
           echo "HOSTNAME_PREFIX=$HOSTNAME_PREFIX" >> $GITHUB_ENV
@@ -103,29 +66,21 @@ jobs:
             --data "Tenant_Name=$TENANT_NAME" \
             --data "Hostname_Prefix=$HOSTNAME_PREFIX")
 
-          echo "Jenkins returned HTTP $HTTP_CODE"
-
-          if [[ "$HTTP_CODE" -ne 201 ]]; then
-            echo "Jenkins job trigger failed"
-            exit 1
-          fi
-
-      - name: Send Slack Message on Jenkins Phase 2 Trigger Failure
-        if: steps.trigger_jenkins.outcome == 'failure'
-        uses: prakritish/slack-notification@v2
-        env:
-          SLACK_CHANNEL: ${{ vars.SLACK_CHANNEL }}
+      - name: Send Slack Success Notification
+        if: steps.trigger_jenkins.outcome == 'success'
+        uses: act10ns/slack@v2
         with:
-          slack_token: ${{ secrets.SLACK_TOKEN }}
-          channel: ${{ env.SLACK_CHANNEL }}
-          result: "FAIL"
-          username: "GithubAction"
-          message: "Failed to trigger Appliance Phase 2 Jenkins job for Tenant ID - ${{ env.TENANT_ID }}."
-          fields: |
-            Job URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            Result: Failure
-            Triggered By: ${{ env.TRIGGERED_BY }}
-            Deployment Type: Ubuntu phase 2
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: "✅ Successfully triggered Phase 2 deployment for tenant : *${{ env.TENANT_NAME }}*"
+          status: success
+
+      - name: Send Slack Failure Notification
+        if: failure() && steps.trigger_jenkins.outcome == 'failure'
+        uses: act10ns/slack@v2
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: "❌ Failed to trigger Phase 2 deployment for tenant: *${{ env.TENANT_NAME }}*"
+          status: failure
 
 
 
