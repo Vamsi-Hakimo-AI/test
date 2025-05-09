@@ -23,7 +23,7 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v44
         with:
-          separator: "\n"
+          separator: ","
 
       - name: Check for hip-motion file changes
         id: check-hip-files
@@ -32,8 +32,7 @@ jobs:
           echo "${{ steps.changed-files.outputs.all_changed_files }}"
 
           MATCH_FOUND=false
-
-          readarray -t changed_files <<< "${{ steps.changed-files.outputs.all_changed_files }}"
+          IFS=',' read -ra changed_files <<< "${{ steps.changed-files.outputs.all_changed_files }}"
 
           for file in "${changed_files[@]}"; do
             echo "Checking file: $file"
@@ -45,8 +44,6 @@ jobs:
           done
 
           echo "MATCH_FOUND=$MATCH_FOUND" >> $GITHUB_ENV
-
-
 
       - name: Extract tenant info from YAML in PR body
         if: env.MATCH_FOUND == 'true'
