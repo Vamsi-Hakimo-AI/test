@@ -1,0 +1,16 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: prometheus-redis-exporter
+  namespace: monitoring
+spec:
+  values:
+    serviceMonitor:
+      enabled: true
+      multipleTarget: true
+      telemetryPath: /scrape
+      targets:
+      - url: redis://redis.motion.svc.cluster.local:6379
+        name: redis-motion
+      labels:
+        release: prometheus-redis-monitor
