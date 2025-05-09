@@ -1,0 +1,16 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: pushgateway
+  namespace: integ
+spec:
+  values:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      honorLabels: true
+      selector:
+        matchLabels:
+          app.kubernetes.io/component: prometheus-pushgateway
+      endpoints:
+        - port: pg-metrics
