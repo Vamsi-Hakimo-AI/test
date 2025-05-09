@@ -29,13 +29,15 @@ jobs:
         id: check-hip-files
         run: |
           MATCH_FOUND=false
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+          readarray -t files <<< "${{ steps.changed-files.outputs.all_changed_files }}"
+          for file in "${files[@]}"; do
             if [[ "$file" == tenants/*/hip-motion/kustomization.yaml || "$file" == tenants/*/hip-motion/hip-values.yaml ]]; then
               MATCH_FOUND=true
               break
             fi
           done
           echo "MATCH_FOUND=$MATCH_FOUND" >> $GITHUB_ENV
+
 
 
 
